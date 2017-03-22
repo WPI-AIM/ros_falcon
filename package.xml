@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
-  <name>rosfalcon</name>
+  <name>ros_falcon</name>
   <version>0.0.0</version>
-  <description>rosfalcon</description>
+  <description>ros_falcon</description>
   <author>Steven Martin</author>
   <license>BSD</license>
   <maintainer email="adnan@todo.todo">adnan</maintainer>
