@@ -1,0 +1,12 @@
+1 - Download and install libnifalcon
+2 - Make sure udev permissions are set correctly. 
+	In ubunut 10.04 
+		- roscd rosfalcon
+		- sudo cp udev_rules/99-udev-novint.rules /etc/udev/rules.d
+		- unplug - replug falcon
+3 - compile rosfalcon
+
+Rosfalcon broadcasts the falcon position on /falconPos
+
+Rosfalcon subscribes to /falconForces topic to receive forces.
+
