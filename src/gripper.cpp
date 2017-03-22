@@ -73,10 +73,11 @@ int main(int argc, char **argv)
 	while(node.ok())
 	{
         ros::spinOnce();	
-        
+        std_msgs::Bool msg;
 		if(angle != prevangle)  //If moving to new position (new msg)
-		{
-			gripper_atpos_pub.publish(false);   //Publish gripper moving
+        {
+            msg.data = false;
+            gripper_atpos_pub.publish(msg);   //Publish gripper moving
             moving = true;
             transit_count = 0;
 			move_gripper();     //Move gripper to new angle
@@ -87,17 +88,20 @@ int main(int argc, char **argv)
             if (transit_count >= 0.75*looprate)  //0.75 second has passed since move to new position started
             {
                 moving = false; //Set movement finished
-                gripper_atpos_pub.publish(true);  //Publish movement finished
+                msg.data = true;
+                gripper_atpos_pub.publish(msg);  //Publish movement finished
             }
             else    //Less than 0.75 second has passed since move to new position
             {
-                gripper_atpos_pub.publish(false);   //Publish gripper in transit
+                msg.data = false;
+                gripper_atpos_pub.publish(msg);   //Publish gripper in transit
                 transit_count++;   
             }
         }
         else    //No new position to move to
         {
-			gripper_atpos_pub.publish(true);  //Publish gripper stationary
+            msg.data = true;
+            gripper_atpos_pub.publish(msg);  //Publish gripper stationary
         }
 
         loop_rate.sleep();

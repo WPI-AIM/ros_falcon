@@ -46,13 +46,14 @@ int main(int argc, char* argv[])
 
 	while(node.ok())
 	{	
+        std_msgs::UInt8 msg;
 
 		if(!init)
 		{
 
 				setpoint_pub.publish(moveto(0, 0, 0.075));
-
-				gripper_pub.publish(gripper_move(Open));
+                msg.data = gripper_move(Open);
+                gripper_pub.publish(msg);
 
 
 				ROS_INFO("Press Enter to commence");
@@ -68,24 +69,24 @@ int main(int argc, char* argv[])
 			setpoint_pub.publish(moveto(-0.052823, 0.017132, 0.11));	//1 (above)
 
 			setpoint_pub.publish(moveto(-0.052823, 0.017132, 0.157));	//1
-
-			gripper_pub.publish(gripper_move(CloseBall));
+            msg.data = gripper_move(CloseBall);
+            gripper_pub.publish(msg);
 
 			setpoint_pub.publish(moveto(-0.052823, 0.017132, 0.11));	//1 (above)
 
 			setpoint_pub.publish(moveto(-0.008, -0.028478, 0.12));	//2 (above)
 
 			setpoint_pub.publish(moveto(-0.008, -0.028478, 0.16));	//2
-
-			gripper_pub.publish(gripper_move(Open));
+            msg.data = gripper_move(Open);
+            gripper_pub.publish(msg);
 
 			setpoint_pub.publish(moveto(-0.008, -0.028478, 0.12));	//2 (above)
 
 			setpoint_pub.publish(moveto(0.0295, 0.032632, 0.12));	//3 (above)
 
 			setpoint_pub.publish(moveto(0.0295, 0.032632, 0.164));	//3
-
-			gripper_pub.publish(gripper_move(CloseBall));
+            msg.data = gripper_move(CloseBall);
+            gripper_pub.publish(msg);
 
 			setpoint_pub.publish(moveto(0.0295, 0.032632, 0.12));	//3 (above)
 
@@ -93,23 +94,24 @@ int main(int argc, char* argv[])
 
 			setpoint_pub.publish(moveto(-0.052823, 0.017132, 0.157));	//1
 
-			gripper_pub.publish(gripper_move(Open));
+            msg.data = gripper_move(Open);
+            gripper_pub.publish(msg);
 		
 			setpoint_pub.publish(moveto(-0.052823, 0.017132, 0.11));	//1 (above)
 
 			setpoint_pub.publish(moveto(-0.008, -0.028478, 0.13));	//2 (above)
 
 			setpoint_pub.publish(moveto(-0.008, -0.028478, 0.16));	//2
-
-			gripper_pub.publish(gripper_move(CloseBall));
+            msg.data = gripper_move(CloseBall);
+            gripper_pub.publish(msg);
 
 			setpoint_pub.publish(moveto(-0.008, -0.028478, 0.13));	//2 (above)
 
 			setpoint_pub.publish(moveto(0.0295, 0.032632, 0.11));	//3 (above)
 
 			setpoint_pub.publish(moveto(0.0295, 0.032632, 0.164));	//3
-
-			gripper_pub.publish(gripper_move(Open));
+            msg.data = gripper_move(Open);
+            gripper_pub.publish(msg);
 
 			setpoint_pub.publish(moveto(0.0295, 0.032632, 0.11));	//3 (above)
 		

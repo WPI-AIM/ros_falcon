@@ -41,9 +41,9 @@ Index 0 is first falcon.
 bool init_falcon(int NoFalcon) 
 
 {
-  	ROS_INFO("Setting up LibUSB");
+    ROS_INFO("Setting up LibUSB");
     m_falconDevice.setFalconFirmware<FalconFirmwareNovintSDK>(); //Set Firmware
-    
+
   	if(!m_falconDevice.open(NoFalcon)) //Open falcon @ index 
   	{
   	    ROS_ERROR("Failed to find Falcon");
@@ -102,8 +102,8 @@ bool init_falcon(int NoFalcon)
     
     m_falconDevice.getFalconFirmware()->setHomingMode(true); //Set homing mode (keep track of encoders !needed!)
     ROS_INFO("Homing Set");
-    boost::array<int, 3> force;
-    m_falconDevice.getFalconFirmware()->setForces(force);
+    std::array<int, 3> force;
+    //m_falconDevice.getFalconFirmware()->setForces(force);
   	m_falconDevice.runIOLoop(); //read in data  	
 
     bool stop = false;
@@ -143,8 +143,7 @@ bool init_falcon(int NoFalcon)
 void get_setpoint(const rosfalcon::falconSetPoint::ConstPtr& point)
 {
 
-    boost::array<double, 3> coords, LegAngles;
-
+    std::array<double, 3> coords, LegAngles;
 	//Get requested coordinates
 	coords[0] = point->X;
 	coords[1] = point->Y;
@@ -154,11 +153,11 @@ void get_setpoint(const rosfalcon::falconSetPoint::ConstPtr& point)
 	falcon_legs.getAngles(coords, LegAngles);
 	for(int i = 0; i < 3; i++)
     {
-		if(isnan(LegAngles[i]))
-		{
-		   ROS_ERROR("Requested coordinates not in Falcon workspace");
-		   return;
-		}
+        if(::isnan(LegAngles[i]))
+        {
+           ROS_ERROR("Requested coordinates not in Falcon workspace");
+           return;
+        }
     }
 
 
@@ -180,7 +179,7 @@ void get_setpoint(const rosfalcon::falconSetPoint::ConstPtr& point)
 bool runPID()
 {
 
-            boost::array<int, 3> encPos;
+            std::array<int, 3> encPos;
 
 			/////////////////////////////////////////////
 		    //Request the current encoder positions:		
@@ -209,7 +208,7 @@ bool runPID()
             ROS_DEBUG("dError 1 = %f dError 2 = %f dError 3 = %f",dError[0], dError[1], dError[2]);
             ROS_DEBUG("Integral 1 = %f Integral 2 = %f Integral 3 = %f",integral[0], integral[1], integral[2]);
 			
-            boost::array<int, 3> force;
+            std::array<int, 3> force;
 
             //Simple PID controller. Repeated for each motor.
 			for(int i = 0; i < 3; i++)
@@ -223,10 +222,12 @@ bool runPID()
                 else if(force[i] < -4096)
                     force[i] = -4096; 
             }
-
+//            force[0] = 0;
+//            force[1] = 0;
+//            force[2] = 0;
             ROS_DEBUG("Force= %d %d %d",force[0], force[1], force[2]);
         
-	        m_falconDevice.getFalconFirmware()->setForces(force); //Write falcon forces to driver (Forces updated on IO loop) Should run @ ~2kHz
+            m_falconDevice.getFalconFirmware()->setForces(force); //Write falcon forces to driver (Forces updated on IO loop) Should run @ ~2kHz
               
             prevError = Error;	//Store current error for comparison on next loop
 
@@ -280,7 +281,7 @@ int main(int argc, char* argv[])
     
     int falcon_int;
     int atpos_count;
-	
+    node.param<int>("falcon_number", falcon_int, 0);
 	if(init_falcon(falcon_int))
 
 	{ 
@@ -290,7 +291,7 @@ int main(int argc, char* argv[])
 
 		ros::Publisher falcon_atpos_pub = node.advertise<std_msgs::Bool>("falcon_atpos", 1);
 		
-		ros::Subscriber setpoint_sub = node.subscribe("falcon_setpoint", 1, get_setpoint);
+        ros::Subscriber setpoint_sub = node.subscribe("falcon_setpoint", 1, get_setpoint);
 
         while(node.ok())
         {
@@ -298,11 +299,12 @@ int main(int argc, char* argv[])
                 ros::spinOnce();        //Get any new messages
 
                 bool atpos = runPID();    //Perform PID control. Returns true when at setpoint, false when in transit
-
+                std_msgs::Bool msg;
                 //If falcon moving, immediately publish not at position. Otherwise, wait 100 loops allowing for oscillation
                 if (atpos == false)
                 {
-                    falcon_atpos_pub.publish(atpos);
+                    msg.data = atpos;
+                    falcon_atpos_pub.publish(msg);
                     atpos_count = 0;
                 }                
                 else
@@ -310,7 +312,8 @@ int main(int argc, char* argv[])
                     atpos_count++;
 
                     if(atpos_count >= 100)
-                        falcon_atpos_pub.publish(atpos);	//Publish at position after 100 loops
+                        msg.data = atpos;
+                        falcon_atpos_pub.publish(msg);	//Publish at position after 100 loops
                 }
             	 
 			while(false == m_falconDevice.getFalconFirmware()->runIOLoop());
