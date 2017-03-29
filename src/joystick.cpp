@@ -157,7 +157,7 @@ int main(int argc, char* argv[])
         m_falconDevice.setFalconKinematic<libnifalcon::FalconKinematicStamper>();
              
         //Start ROS Publisher
-        ros::Publisher pub = node.advertise<sensor_msgs::Joy>("falconJoy",10);
+        ros::Publisher pub = node.advertise<sensor_msgs::Joy>("/falcon/joystick",10);
         ros::Rate loop_rate(1000);
 
         while(node.ok())
@@ -203,7 +203,7 @@ int main(int argc, char* argv[])
                 if(debug)
                 {
                     cout << "Position= " << Pos[0] <<" " << Pos[1] << " " << Pos[2] <<  endl;                   
-                    cout << "Force= " << forces[0] <<" " << forces[1] << " " << forces[2] <<  endl;
+                    //cout << "Force= " << forces[0] <<" " << forces[1] << " " << forces[2] <<  endl;
                 }
                 prevPos = Pos;
             }
