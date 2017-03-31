@@ -147,8 +147,14 @@ int main(int argc, char* argv[])
     ros::NodeHandle node;
     int falcon_int;
     bool debug;
+    //Button 4 is mimic-ing clutch.
+    bool clutch_pressed;
     node.param<int>("falcon_number", falcon_int, 0);
-    node.param<bool>("falcon_debug", debug, true);
+    node.param<bool>("falcon_debug", debug, false);
+    node.param<bool>("falcon_clutch", debug, false);
+
+
+
 
     if(init_falcon(falcon_int))
     { 
@@ -166,7 +172,9 @@ int main(int argc, char* argv[])
             std::array<double, 3> prevPos;
 
             Joystick.buttons.resize(1);
-            Joystick.axes.resize(3);	    
+            Joystick.axes.resize(3);
+
+            std::array<double,3> forces;
 
             if(m_falconDevice.runIOLoop())
             {
@@ -193,11 +201,27 @@ int main(int argc, char* argv[])
                 float KdGainY = -500;
                 float KdGainZ = -500;
                 
-                //Simple PD controller
-                std::array<double,3> forces;
-                forces[0] = Pos[0] * KpGainX + (Pos[0] - prevPos[0])*KdGainX;
-                forces[1] = Pos[1] * KpGainY+ (Pos[1] - prevPos[1])*KdGainY;
-                forces[2] = (Pos[2]-0.1) * KpGainZ+ (Pos[2] - prevPos[2])*KdGainZ;
+
+                // Check if button 4 is pressed, set the forces equal to 0.
+                if(buttons == 4){
+                    if(clutch_pressed == false){
+                        ROS_INFO("Clutch Pressed (Button 4)");
+                        clutch_pressed = true;
+                    }
+                    forces[0] = 0;
+                    forces[1] = 0;
+                    forces[2] = 0;
+                }
+                else{
+                    if(clutch_pressed == true){
+                        ROS_INFO("Clutch Released (Button 4)");
+                        clutch_pressed = false;
+                    }
+                    //Simple PD controller
+                    forces[0] = Pos[0] * KpGainX + (Pos[0] - prevPos[0])*KdGainX;
+                    forces[1] = Pos[1] * KpGainY+ (Pos[1] - prevPos[1])*KdGainY;
+                    forces[2] = (Pos[2]-0.1) * KpGainZ+ (Pos[2] - prevPos[2])*KdGainZ;
+                }
                 m_falconDevice.setForce(forces); //Write falcon forces to driver (Forces updated on IO loop) Should run @ ~1kHz
 
                 if(debug)
