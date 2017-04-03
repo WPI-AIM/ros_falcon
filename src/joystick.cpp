@@ -148,26 +148,27 @@ int main(int argc, char* argv[])
     int falcon_int;
     bool debug;
     //Button 4 is mimic-ing clutch.
-    bool clutch_just_pressed;
+    bool clutchPressed, coagPressed;
     node.param<int>("falcon_number", falcon_int, 0);
     node.param<bool>("falcon_debug", debug, false);
-    node.param<bool>("falcon_clutch", clutch_just_pressed, true);
+    node.param<bool>("falcon_clutch", clutchPressed, true);
+    node.param<bool>("falcon_coag", coagPressed, true);
 
 
 
 
     if(init_falcon(falcon_int))
-    { 
+    {
         cout << "Falcon Initialised Starting ROS Node" << endl;
 
         m_falconDevice.setFalconKinematic<libnifalcon::FalconKinematicStamper>();
-             
+
         //Start ROS Publisher
         ros::Publisher pub = node.advertise<sensor_msgs::Joy>("/falcon/joystick",10);
         ros::Rate loop_rate(1000);
 
         while(node.ok())
-	    {
+        {
             sensor_msgs::Joy Joystick;
             std::array<double, 3> prevPos;
 
@@ -182,8 +183,8 @@ int main(int argc, char* argv[])
 
             if(m_falconDevice.runIOLoop())
             {
-		        /////////////////////////////////////////////
-		        Pos = m_falconDevice.getPosition();  //Read in cartesian position
+                /////////////////////////////////////////////
+                Pos = m_falconDevice.getPosition();  //Read in cartesian position
 
                 buttons = m_falconDevice.getFalconGrip()->getDigitalInputs(); //Read in buttons
 
@@ -195,31 +196,40 @@ int main(int argc, char* argv[])
                 pub.publish(Joystick);
                 
                 //TODO if Joystick can subscribe to twist message use those forces instead for haptic feedback
-                //if 
-                float KpGainX = -200;                
+                //if
+                float KpGainX = -200;
                 float KpGainY = -200;
                 float KpGainZ = -200;
 
-                float KdGainX = -500;                
+                float KdGainX = -500;
                 float KdGainY = -500;
                 float KdGainZ = -500;
                 
 
                 // Check if button 4 is pressed, set the forces equal to 0.
-                if(buttons == 4){
-                    if(clutch_just_pressed == false){
-                        ROS_INFO("Clutch Pressed (Button 4)");
-                        clutch_just_pressed = true;
+                if(buttons == 4 || buttons == 2){
+                    if(buttons == 4 && coagPressed == false){
+                        ROS_INFO("Coag Pressed (Button 4)");
+                        coagPressed = true;
+                    }
+                    else if(buttons == 2 && clutchPressed == false){
+                        ROS_INFO("Clutch Pressed (Button 2)");
+                        clutchPressed = true;
                     }
                     forces[0] = 0;
                     forces[1] = 0;
                     forces[2] = 0;
                 }
                 else{
-                    if(clutch_just_pressed == true){
-                        ROS_INFO("Clutch Released (Button 4)");
-                        clutch_just_pressed = false;
-                        newHome = Pos;  //Read in cartesian position
+                    if(coagPressed == true){
+                        ROS_INFO("Coag Released (Button 4)");
+                        coagPressed = false;
+                        newHome = Pos;
+                    }
+                    else if(clutchPressed == true){
+                        ROS_INFO("Clutch Released (Button 2)");
+                        clutchPressed = false;
+                        newHome = Pos;
                     }
                     //Simple PD controller
                     forces[0] = ((Pos[0] - newHome[0]) * KpGainX) + (Pos[0] - prevPos[0])*KdGainX;
@@ -239,8 +249,8 @@ int main(int argc, char* argv[])
                 prevHome = newHome;
             }
             loop_rate.sleep();
-	    }
+        }
         m_falconDevice.close();
     }
-	return 0;
+    return 0;
 }
