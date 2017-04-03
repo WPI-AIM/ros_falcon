@@ -148,10 +148,10 @@ int main(int argc, char* argv[])
     int falcon_int;
     bool debug;
     //Button 4 is mimic-ing clutch.
-    bool clutch_pressed;
+    bool clutch_just_pressed;
     node.param<int>("falcon_number", falcon_int, 0);
     node.param<bool>("falcon_debug", debug, false);
-    node.param<bool>("falcon_clutch", debug, false);
+    node.param<bool>("falcon_clutch", clutch_just_pressed, true);
 
 
 
@@ -175,14 +175,17 @@ int main(int argc, char* argv[])
             Joystick.axes.resize(3);
 
             std::array<double,3> forces;
+            //Request the current encoder positions:
+            std::array<double, 3> Pos;
+            std::array<double, 3> newHome, prevHome;
+            int buttons;
 
             if(m_falconDevice.runIOLoop())
             {
 		        /////////////////////////////////////////////
-		        //Request the current encoder positions:
-                std::array<double, 3> Pos;
 		        Pos = m_falconDevice.getPosition();  //Read in cartesian position
-                int buttons = m_falconDevice.getFalconGrip()->getDigitalInputs(); //Read in buttons
+
+                buttons = m_falconDevice.getFalconGrip()->getDigitalInputs(); //Read in buttons
 
                 //Publish ROS values
                 Joystick.buttons[0] = buttons;
@@ -204,32 +207,36 @@ int main(int argc, char* argv[])
 
                 // Check if button 4 is pressed, set the forces equal to 0.
                 if(buttons == 4){
-                    if(clutch_pressed == false){
+                    if(clutch_just_pressed == false){
                         ROS_INFO("Clutch Pressed (Button 4)");
-                        clutch_pressed = true;
+                        clutch_just_pressed = true;
                     }
                     forces[0] = 0;
                     forces[1] = 0;
                     forces[2] = 0;
                 }
                 else{
-                    if(clutch_pressed == true){
+                    if(clutch_just_pressed == true){
                         ROS_INFO("Clutch Released (Button 4)");
-                        clutch_pressed = false;
+                        clutch_just_pressed = false;
+                        newHome = Pos;  //Read in cartesian position
                     }
                     //Simple PD controller
-                    forces[0] = Pos[0] * KpGainX + (Pos[0] - prevPos[0])*KdGainX;
-                    forces[1] = Pos[1] * KpGainY+ (Pos[1] - prevPos[1])*KdGainY;
-                    forces[2] = (Pos[2]-0.1) * KpGainZ+ (Pos[2] - prevPos[2])*KdGainZ;
+                    forces[0] = ((Pos[0] - newHome[0]) * KpGainX) + (Pos[0] - prevPos[0])*KdGainX;
+                    forces[1] = ((Pos[1] - newHome[1]) * KpGainY) + (Pos[1] - prevPos[1])*KdGainY;
+                    forces[2] = ((Pos[2] - newHome[2]) * KpGainZ) + (Pos[2] - prevPos[2])*KdGainZ;
                 }
                 m_falconDevice.setForce(forces); //Write falcon forces to driver (Forces updated on IO loop) Should run @ ~1kHz
 
                 if(debug)
                 {
-                    cout << "Position= " << Pos[0] <<" " << Pos[1] << " " << Pos[2] <<  endl;                   
+                    cout << "Position= " << Pos[0] <<" " << Pos[1] << " " << Pos[2] <<  endl;
+                    cout << "newHome  = " << newHome[0] <<" " << newHome[1] << " " << newHome[2] <<  endl;
+                    cout << "Error   =" << Pos[0] - newHome[0] <<" " << Pos[1]-newHome[1] << " " << Pos[2] -newHome[2] <<  endl;
                     //cout << "Force= " << forces[0] <<" " << forces[1] << " " << forces[2] <<  endl;
                 }
                 prevPos = Pos;
+                prevHome = newHome;
             }
             loop_rate.sleep();
 	    }
