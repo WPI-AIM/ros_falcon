@@ -4,7 +4,7 @@
 #include <ros/ros.h>
 #include <math.h>
 
-#include "rosfalcon/falconSetPoint.h"
+#include "ros_falcon/falconSetPoint.h"
 #include "std_msgs/Bool.h"
 
 #include "falcon/core/FalconDevice.h"
@@ -141,7 +141,7 @@ bool init_falcon(int NoFalcon)
 
 
 //Read falcon set point (requested coordinates)
-void get_setpoint(const rosfalcon::falconSetPoint::ConstPtr& point)
+void get_setpoint(const ros_falcon::falconSetPoint::ConstPtr& point)
 {
 
     std::array<double, 3> coords, LegAngles;

@@ -1,12 +1,12 @@
 #include <ros/ros.h>
 #include <stdio.h>
 
-#include "rosfalcon/falconSetPoint.h"
+#include "ros_falcon/falconSetPoint.h"
 #include "std_msgs/Bool.h"
 #include "std_msgs/UInt8.h"
 
 bool falcon_atpos, gripper_atpos;
-rosfalcon::falconSetPoint SetPoint;
+ros_falcon::falconSetPoint SetPoint;
 
 //Servo angles
 const int Open = 100;
@@ -16,7 +16,7 @@ const int ClosePencil = 43;
 //Function prototypes
 void falcon_moving(const std_msgs::Bool::ConstPtr& falconmove);
 void gripper_moving(const std_msgs::Bool::ConstPtr& grippermove);
-rosfalcon::falconSetPoint moveto(double x, double y, double z);
+ros_falcon::falconSetPoint moveto(double x, double y, double z);
 int gripper_move(int angle);
 
 
@@ -30,7 +30,7 @@ int main(int argc, char* argv[])
 	ros::Subscriber falcon_moving_sub = node.subscribe("falcon_atpos", 1, falcon_moving);
     ros::Subscriber gripper_moving_sub = node.subscribe("gripper_atpos", 1, gripper_moving);
 
-    ros::Publisher setpoint_pub = node.advertise<rosfalcon::falconSetPoint>("falcon_setpoint", 1);
+    ros::Publisher setpoint_pub = node.advertise<ros_falcon::falconSetPoint>("falcon_setpoint", 1);
     ros::Publisher gripper_pub = node.advertise<std_msgs::UInt8>("servo_angle",1);
 
     ROS_INFO("Starting Robot Control node");
@@ -137,7 +137,7 @@ void gripper_moving(const std_msgs::Bool::ConstPtr& grippermove)
     gripper_atpos = grippermove->data;
 }
 
-rosfalcon::falconSetPoint moveto(double x, double y, double z)
+ros_falcon::falconSetPoint moveto(double x, double y, double z)
 {
     ros::NodeHandle node;
     ros::Rate loop_rate(25);
