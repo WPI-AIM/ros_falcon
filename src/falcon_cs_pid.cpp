@@ -155,7 +155,7 @@ void get_setpoint(const ros_falcon::falconSetPoint::ConstPtr& point)
 	falcon_legs.getAngles(coords, LegAngles);
 	for(int i = 0; i < 3; i++)
     {
-        if(::isnan(LegAngles[i]))
+        if(std::isnan(LegAngles[i]))
         {
            ROS_ERROR("Requested coordinates not in Falcon workspace");
            return;
