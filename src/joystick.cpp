@@ -4,11 +4,17 @@
 // Steven Martin
 // 22/07/10
 
+// Updated for sawyer-robot-learning by:
+// @ioarun 22/10/18
+
 #include <iostream>
 #include <string>
 #include <cmath>
 #include <ros/ros.h>
 #include <sensor_msgs/Joy.h>
+
+#include "ros_falcon/falconPos.h"
+#include "ros_falcon/falconForces.h"
 
 #include "falcon/core/FalconDevice.h"
 #include "falcon/firmware/FalconFirmwareNovintSDK.h"
@@ -139,6 +145,15 @@ bool init_falcon(int NoFalcon)
     return true;
 }
 
+void forceCallback(const ros_falcon::falconForcesConstPtr& msg)
+{
+    std::array<double,3> forces;
+    forces[0] = (msg->X);
+    forces[1] = (msg->Z);
+    forces[2] = (msg->Y);
+
+    m_falconDevice.setForce(forces);
+}
 
 int main(int argc, char* argv[])
 {
@@ -162,6 +177,10 @@ int main(int argc, char* argv[])
         cout << "Falcon Initialised Starting ROS Node" << endl;
 
         m_falconDevice.setFalconKinematic<libnifalcon::FalconKinematicStamper>();
+
+        //Start ROS Subscriber
+        ros::Subscriber sub = node.subscribe("/falconForce", 10, &forceCallback);
+
 
         //Start ROS Publisher
         ros::Publisher pub = node.advertise<sensor_msgs::Joy>("/falcon/joystick",10);
@@ -197,57 +216,58 @@ int main(int argc, char* argv[])
                 
                 //TODO if Joystick can subscribe to twist message use those forces instead for haptic feedback
                 //if
-                float KpGainX = -200;
-                float KpGainY = -200;
-                float KpGainZ = -200;
+                // float KpGainX = -200;
+                // float KpGainY = -200;
+                // float KpGainZ = -200;
 
-                float KdGainX = -500;
-                float KdGainY = -500;
-                float KdGainZ = -500;
+                // float KdGainX = -500;
+                // float KdGainY = -500;
+                // float KdGainZ = -500;
                 
 
-                // Check if button 4 is pressed, set the forces equal to 0.
-                if(buttons == 4 || buttons == 2){
-                    if(buttons == 4 && coagPressed == false){
-                        ROS_INFO("Coag Pressed (Button 4)");
-                        coagPressed = true;
-                    }
-                    else if(buttons == 2 && clutchPressed == false){
-                        ROS_INFO("Clutch Pressed (Button 2)");
-                        clutchPressed = true;
-                    }
-                    forces[0] = 0;
-                    forces[1] = 0;
-                    forces[2] = 0;
-                }
-                else{
-                    if(coagPressed == true){
-                        ROS_INFO("Coag Released (Button 4)");
-                        coagPressed = false;
-                        newHome = Pos;
-                    }
-                    else if(clutchPressed == true){
-                        ROS_INFO("Clutch Released (Button 2)");
-                        clutchPressed = false;
-                        newHome = Pos;
-                    }
-                    //Simple PD controller
-                    forces[0] = ((Pos[0] - newHome[0]) * KpGainX) + (Pos[0] - prevPos[0])*KdGainX;
-                    forces[1] = ((Pos[1] - newHome[1]) * KpGainY) + (Pos[1] - prevPos[1])*KdGainY;
-                    forces[2] = ((Pos[2] - newHome[2]) * KpGainZ) + (Pos[2] - prevPos[2])*KdGainZ;
-                }
-                m_falconDevice.setForce(forces); //Write falcon forces to driver (Forces updated on IO loop) Should run @ ~1kHz
+                // // Check if button 4 is pressed, set the forces equal to 0.
+                // if(buttons == 4 || buttons == 2){
+                //     if(buttons == 4 && coagPressed == false){
+                //         ROS_INFO("Coag Pressed (Button 4)");
+                //         coagPressed = true;
+                //     }
+                //     else if(buttons == 2 && clutchPressed == false){
+                //         ROS_INFO("Clutch Pressed (Button 2)");
+                //         clutchPressed = true;
+                //     }
+                //     forces[0] = 0;
+                //     forces[1] = 0;
+                //     forces[2] = 0;
+                // }
+                // else{
+                //     if(coagPressed == true){
+                //         ROS_INFO("Coag Released (Button 4)");
+                //         coagPressed = false;
+                //         newHome = Pos;
+                //     }
+                //     else if(clutchPressed == true){
+                //         ROS_INFO("Clutch Released (Button 2)");
+                //         clutchPressed = false;
+                //         newHome = Pos;
+                //     }
+                //     //Simple PD controller
+                //     forces[0] = ((Pos[0] - newHome[0]) * KpGainX) + (Pos[0] - prevPos[0])*KdGainX;
+                //     forces[1] = ((Pos[1] - newHome[1]) * KpGainY) + (Pos[1] - prevPos[1])*KdGainY;
+                //     forces[2] = ((Pos[2] - newHome[2]) * KpGainZ) + (Pos[2] - prevPos[2])*KdGainZ;
+                // }
+                // m_falconDevice.setForce(forces); //Write falcon forces to driver (Forces updated on IO loop) Should run @ ~1kHz
 
-                if(debug)
-                {
-                    cout << "Position= " << Pos[0] <<" " << Pos[1] << " " << Pos[2] <<  endl;
-                    cout << "newHome  = " << newHome[0] <<" " << newHome[1] << " " << newHome[2] <<  endl;
-                    cout << "Error   =" << Pos[0] - newHome[0] <<" " << Pos[1]-newHome[1] << " " << Pos[2] -newHome[2] <<  endl;
-                    //cout << "Force= " << forces[0] <<" " << forces[1] << " " << forces[2] <<  endl;
-                }
-                prevPos = Pos;
-                prevHome = newHome;
+                // if(debug)
+                // {
+                //     cout << "Position= " << Pos[0] <<" " << Pos[1] << " " << Pos[2] <<  endl;
+                //     cout << "newHome  = " << newHome[0] <<" " << newHome[1] << " " << newHome[2] <<  endl;
+                //     cout << "Error   =" << Pos[0] - newHome[0] <<" " << Pos[1]-newHome[1] << " " << Pos[2] -newHome[2] <<  endl;
+                //     //cout << "Force= " << forces[0] <<" " << forces[1] << " " << forces[2] <<  endl;
+                // }
+                // prevPos = Pos;
+                // prevHome = newHome;
             }
+            ros::spinOnce();
             loop_rate.sleep();
         }
         m_falconDevice.close();

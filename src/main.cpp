@@ -9,8 +9,8 @@
 #include <string>
 #include <cmath>
 #include <ros/ros.h>
-#include <rosfalcon/falconPos.h>
-#include <rosfalcon/falconForces.h>
+#include <ros_falcon/falconPos.h>
+#include <ros_falcon/falconForces.h>
 
 #include "falcon/core/FalconDevice.h"
 #include "falcon/firmware/FalconFirmwareNovintSDK.h"
@@ -142,7 +142,7 @@ bool init_falcon( int NoFalcon)
     return true;	
 }
 
-void forceCallback(const rosfalcon::falconForcesConstPtr& msg)
+void forceCallback(const ros_falcon::falconForcesConstPtr& msg)
 {
     boost::array<double,3> forces;
     forces[0] = msg->X;
@@ -168,7 +168,7 @@ int main(int argc, char* argv[])
         ros::Subscriber sub = node.subscribe("/falconForce", 10, &forceCallback);
         
         //Start ROS Publisher
-        ros::Publisher pub = node.advertise<rosfalcon::falconPos>("falconPos",10);        
+        ros::Publisher pub = node.advertise<ros_falcon::falconPos>("falconPos",10);        
 
         while(node.ok())
 	    {
@@ -181,7 +181,7 @@ int main(int argc, char* argv[])
 		    Pos = m_falconDevice.getPosition();
 
             //Publish ROS values
-		    rosfalcon::falconPos position;
+		    ros_falcon::falconPos position;
             position.X = Pos[0];
             position.Y = Pos[1];
             position.Z = Pos[2];
