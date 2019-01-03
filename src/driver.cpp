@@ -10,8 +10,8 @@
 #include <string>
 #include <cmath>
 #include <ros/ros.h>
-#include <rosfalcon/falconPos.h>
-#include <rosfalcon/falconForces.h>
+#include <ros_falcon/falconPos.h>
+#include <ros_falcon/falconForces.h>
 
 #include "falcon/core/FalconDevice.h"
 #include "falcon/firmware/FalconFirmwareNovintSDK.h"
@@ -27,6 +27,7 @@
 using namespace libnifalcon;
 using namespace std;
 using namespace StamperKinematicImpl;
+using namespace ros_falcon;
 FalconDevice m_falconDevice;
 
 /**********************************************
@@ -99,7 +100,7 @@ bool init_falcon(int NoFalcon)
     
     m_falconDevice.getFalconFirmware()->setHomingMode(true); //Set homing mode (keep track of encoders !needed!)
     cout << "Homing Set" << endl;
-    boost::array<int, 3> forces;
+    std::array<int, 3> forces;
     m_falconDevice.getFalconFirmware()->setForces(forces);
   	m_falconDevice.runIOLoop(); //read in data  	
 
@@ -137,9 +138,9 @@ bool init_falcon(int NoFalcon)
     return true;	
 }
 
-void forceCallback(const rosfalcon::falconForcesConstPtr& msg)
+void forceCallback(const ros_falcon::falconForcesConstPtr& msg)
 {
-    boost::array<double,3> forces;
+    std::array<double,3> forces;
     forces[0] = msg->X;
     forces[1] = msg->Y;
     forces[2] = msg->Z;
@@ -166,7 +167,7 @@ int main(int argc, char* argv[])
         ros::Subscriber sub = node.subscribe("/falconForce", 10, &forceCallback);
         
         //Start ROS Publisher
-        ros::Publisher pub = node.advertise<rosfalcon::falconPos>("falconPos",10);        
+        ros::Publisher pub = node.advertise<ros_falcon::falconPos>("falconPos",10);        
 
         ros::Rate loop_rate(1000);
 
@@ -176,11 +177,11 @@ int main(int argc, char* argv[])
             {
 		        //////////////////////////////////////////////
 		        //Request the current encoder positions:
-		        boost::array<double, 3> Pos;
+		        std::array<double, 3> Pos;
 		        Pos = m_falconDevice.getPosition();
 
                 //Publish ROS values
-		        rosfalcon::falconPos position;
+		        ros_falcon::falconPos position;
                 position.X = Pos[0];
                 position.Y = Pos[1];
                 position.Z = Pos[2];
