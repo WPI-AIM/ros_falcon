@@ -54,12 +54,12 @@ bool init_falcon(int NoFalcon)
 
     //There's only one kind of firmware right now, so automatically set that.
 	m_falconDevice.setFalconFirmware<FalconFirmwareNovintSDK>();
-	//Next load the firmware to the device
-	
+	//Next load the firmware to the device	
 	bool skip_checksum = false;
 	//See if we have firmware
 	bool firmware_loaded = false;
 	firmware_loaded = m_falconDevice.isFirmwareLoaded();
+	
 	if(!firmware_loaded)
 	{
 		cout << "Loading firmware" << endl;
@@ -80,62 +80,62 @@ bool init_falcon(int NoFalcon)
 				}
 				else
 				{
-					firmware_loaded = true;
-					break;
-				}
-			}
-		}
-	}
-	else if(!firmware_loaded)
-	{
-		cout << "No firmware loaded to device, and no firmware specified to load (--nvent_firmware, --test_firmware, etc...). Cannot continue" << endl;
-		return false;
-	}
-	if(!firmware_loaded || !m_falconDevice.isFirmwareLoaded())
-	{
-		cout << "No firmware loaded to device, cannot continue" << endl;
-		return false;
-	}
-	cout << "Firmware loaded" << endl;
+	                firmware_loaded = true;
+                    break;
+                }
+            }
+        }
+    }
+    else if(!firmware_loaded)
+    {
+        cout << "No firmware loaded to device, and no firmware specified to load (--nvent_firmware, --test_firmware, etc...). Cannot continue" << endl;
+        return false;
+    }
+    if(!firmware_loaded || !m_falconDevice.isFirmwareLoaded())
+    {
+        cout << "No firmware loaded to device, cannot continue" << endl;
+        return false;
+    }
+    cout << "Firmware loaded" << endl;
     
     m_falconDevice.getFalconFirmware()->setHomingMode(true); //Set homing mode (keep track of encoders !needed!)
     cout << "Homing Set" << endl;
     std::array<int, 3> forces;
     m_falconDevice.getFalconFirmware()->setForces(forces);
-  	m_falconDevice.runIOLoop(); //read in data  	
+    m_falconDevice.runIOLoop(); //read in data      
 
-  	{
-	    bool stop = false;
-	    bool homing = false;
-	    bool homing_reset = false;
-	    usleep(100000);
+    {
+        bool stop = false;
+        bool homing = false;
+        bool homing_reset = false;
+        usleep(100000);
         int tryLoad = 0;
-	    while(!stop && tryLoad < 100)
-	    {
-		    if(!m_falconDevice.runIOLoop()) continue;
-		    if(!m_falconDevice.getFalconFirmware()->isHomed())
-		    {
-			    if(!homing)
-			    {
-				    m_falconDevice.getFalconFirmware()->setLEDStatus(libnifalcon::FalconFirmware::RED_LED);
-				    cout << "Falcon not currently homed. Move control all the way out then push straight all the way in." << endl;
-       	        
-			    }
-			    homing = true;
-		    }
+        while(!stop && tryLoad < 100)
+        {
+            if(!m_falconDevice.runIOLoop()) continue;
+            if(!m_falconDevice.getFalconFirmware()->isHomed())
+            {
+                if(!homing)
+                {
+                    m_falconDevice.getFalconFirmware()->setLEDStatus(libnifalcon::FalconFirmware::RED_LED);
+                    cout << "Falcon not currently homed. Move control all the way out then push straight all the way in." << endl;
+                
+                }
+                homing = true;
+            }
 
-		    if(homing && m_falconDevice.getFalconFirmware()->isHomed())
-		    {
-			    m_falconDevice.getFalconFirmware()->setLEDStatus(libnifalcon::FalconFirmware::BLUE_LED);
-			    cout << "Falcon homed." << endl;
-			    homing_reset = true;
-			    stop = true;
-		    }
+            if(homing && m_falconDevice.getFalconFirmware()->isHomed())
+            {
+                m_falconDevice.getFalconFirmware()->setLEDStatus(libnifalcon::FalconFirmware::BLUE_LED);
+                cout << "Falcon homed." << endl;
+                homing_reset = true;
+                stop = true;
+            }
             tryLoad++;
-	    }
+        }
         while(!m_falconDevice.runIOLoop());
     }
-    return true;	
+    return true;    
 }
 
 void forceCallback(const ros_falcon::falconForcesConstPtr& msg)
@@ -144,7 +144,7 @@ void forceCallback(const ros_falcon::falconForcesConstPtr& msg)
     forces[0] = msg->X;
     forces[1] = msg->Y;
     forces[2] = msg->Z;
-	m_falconDevice.setForce(forces);
+    m_falconDevice.setForce(forces);
 
     cout << "set Force" << endl;
     //TODO Add safety to only apply forces for limited time
@@ -172,27 +172,28 @@ int main(int argc, char* argv[])
         ros::Rate loop_rate(1000);
 
         while(node.ok())
-	    {
-		    if(m_falconDevice.runIOLoop())
             {
-		        //////////////////////////////////////////////
-		        //Request the current encoder positions:
-		        std::array<double, 3> Pos;
-		        Pos = m_falconDevice.getPosition();
-
-                //Publish ROS values
-		        ros_falcon::falconPos position;
-                position.X = Pos[0];
-                position.Y = Pos[1];
-                position.Z = Pos[2];
-                pub.publish(position);
-                
-            }
+            if(m_falconDevice.runIOLoop())
+                {
+                    //////////////////////////////////////////////
+                    //Request the current encoder positions:
+                    std::array<double, 3> Pos;
+                    Pos = m_falconDevice.getPosition();
+                    
+                    //Publish ROS values
+                    ros_falcon::falconPos position;
+                    position.X = Pos[0];
+                    position.Y = Pos[1];
+                    position.Z = Pos[2];
+                    pub.publish(position);
+                    
+                }
+			ros::spinOnce();
             loop_rate.sleep();
-	    }
+        }
         m_falconDevice.close();
     }
-
-	return 0;
+    
+    return 0;
 }
 
