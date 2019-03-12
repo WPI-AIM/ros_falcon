@@ -2,22 +2,13 @@
 
 #sgillen - this program serves as a node that offers the arduino up to the rest of the ros system.
 
-
-# the packets send to the arduino should be in the following format: p<data>!
-# p tells the arduino which command to execute, the data that follows will depend on which command this is
-# in general the , character is used as a delimiter, and the ! is used to mark the end of the message
-
-# commands so far
-# t,x0,x1,x2,x3,x4,x5,x6,x7!    - this sets all 8 thruster values
-# d!                            - this requests the most recent depth value from the arduino (TODO)
-
 import serial, time, sys, select
 import rospy
 from std_msgs.msg import Int64, Float64, String, Float64MultiArray
 from std_srvs.srv import Empty, EmptyResponse
 from ros_falcon.msg import falconForces, falconPos
 
-device = '/dev/ttyACM4'
+device = '/dev/ttyACM4' # TODO
 
 pose_cmds = [0,0,0]
 
@@ -67,9 +58,6 @@ def pose_callback(msg):
 # main
 if __name__ == '__main__':
 
-    # map for messages
-    msg = {'t': '', 'd': '', 's': ''}
-
     #!!! this also restarts the arduino! (apparently)
 
     # print "trying to connect to arduino"
@@ -83,34 +71,28 @@ if __name__ == '__main__':
     #         continue
 
 
-    print "found it!@"
+    print "found it!"
     time.sleep(3)
 
-    rospy.init_node('lynx_node', anonymous=False)
-    
 
     force_pub = rospy.Publisher('falconForce', falconForces, queue_size = 10)
+    rospy.init_node('lynx_node', anonymous=False)
+    
     pose_sub = rospy.Subscriber('falconPos', falconPos, pose_callback)
-
-
+    
     rate = rospy.Rate(10) #100Hz
-
-    # zero the thrusters
-    # send_pose_cmds([0,0,0])
 
     while not rospy.is_shutdown():
 
-
-
-       # send_pose_cmds(pose_cmds)
+        #send_pose_cmds(pose_cmds)
 
         #ser.write('c!')
         #temp = ser.readline()
         #print(temp)
 
         # get thruster cmd
-#        x = ser.readline().strip()
-#        print x
+        # x = ser.readline().strip()
+        # print x
         
         # if x != '':
         #     msg[x[0]] = x[1:]
@@ -120,6 +102,8 @@ if __name__ == '__main__':
         #     msg[x[0]] = x[1:]
         #status = ser.readline().strip()
 
+        
+        force_pub.publish(falconForces(1,1,1))
         print pose_cmds
         
         rate.sleep()
