@@ -8,7 +8,7 @@ from std_msgs.msg import Int64, Float64, String, Float64MultiArray
 from std_srvs.srv import Empty, EmptyResponse
 from ros_falcon.msg import falconForces, falconPos
 
-device = '/dev/ttyACM4' # TODO
+device = '/dev/ttyACM1' # TODO
 
 pose_cmds = [0,0,0]
 
@@ -55,20 +55,19 @@ def pose_callback(msg):
     pose_cmds[2] = msg.Z
 
 ##------------------------------------------------------------------------------
-# main
 if __name__ == '__main__':
 
     #!!! this also restarts the arduino! (apparently)
 
-    # print "trying to connect to arduino"
-    # Keep trying to open serial
-    # while True:
-    #     try:
-    #         ser = serial.Serial(device,115200, timeout=0,parity=serial.PARITY_NONE,stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS)
-    #         break
-    #     except:
-    #         time.sleep(0.25)
-    #         continue
+    print "trying to connect to arduino"
+   # Keep trying to open serial
+    while True:
+        try:
+            ser = serial.Serial(device,115200, timeout=0,parity=serial.PARITY_NONE,stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS)
+            break
+        except:
+            time.sleep(0.25)
+            continue
 
 
     print "found it!"
@@ -80,7 +79,7 @@ if __name__ == '__main__':
     
     pose_sub = rospy.Subscriber('falconPos', falconPos, pose_callback)
     
-    rate = rospy.Rate(10) #100Hz
+    rate = rospy.Rate(1000) #100Hz
 
     while not rospy.is_shutdown():
 
@@ -91,8 +90,8 @@ if __name__ == '__main__':
         #print(temp)
 
         # get thruster cmd
-        # x = ser.readline().strip()
-        # print x
+        x = ser.readline().strip()
+        print x
         
         # if x != '':
         #     msg[x[0]] = x[1:]
@@ -104,6 +103,6 @@ if __name__ == '__main__':
 
         
         force_pub.publish(falconForces(1,1,1))
-        print pose_cmds
+        #print pose_cmds
         
         rate.sleep()
