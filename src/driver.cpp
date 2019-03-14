@@ -171,7 +171,7 @@ int main(int argc, char* argv[])
 			//Start ROS Publisher
 			ros::Publisher pub = node.advertise<ros_falcon::falconPos>("falconPos",10);        
 
-			ros::Rate loop_rate(1000);
+			ros::Rate loop_rate(100);
 
 			while(node.ok())
 				{
