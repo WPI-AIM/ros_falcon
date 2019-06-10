@@ -1,8 +1,8 @@
-import roslib; roslib.load_manifest('rosfalcon')
+import roslib; roslib.load_manifest('ros_falcon')
 
 import rospy
 from geometry_msgs.msg import Twist
-from joy.msg import Joy
+from sensor_msgs.msg import Joy
 
 def joyCallBack(data,cmd_vel):
     #print data
