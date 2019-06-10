@@ -1,4 +1,4 @@
-import roslib; roslib.load_manifest('rosfalcon')
+import roslib; roslib.load_manifest('ros_falcon')
 
 import rospy
 from geometry_msgs.msg import Twist
