@@ -1,19 +1,21 @@
 # Description
-This package allows ROS to interface with Novint Falcon and expose the device parameters via rostopics.
+This package allows ROS interface with the Novint Falcon Device.
 
-## Author
+## Authors
 Steven Martin:
 
 Adnan Munawar: amunawar@wpi.edu
 
 ## Dependencies
-Tested on ROS Hydro and Indigo.
+Tested on ROS Hydro, Indigo and Melodic.
 
-Download and install libnifalcon
+Download and install the drivers from:
 
- https://github.com/libnifalcon/libnifalcon
+https://github.com/libnifalcon/libnifalcon
+ 
+Make sure to install them in addition to building them.
 
-Make sure udev permissions are set correctly. In ubunut 14.04 
+Make sure udev permissions are set correctly. In Ubuntu 14.04, 16.04 and 18.04 
 
   **roscd ros_falcon**
   
@@ -21,6 +23,10 @@ Make sure udev permissions are set correctly. In ubunut 14.04
   
   **unplug - replug falcon**
 
-### Usage
-Run any bin from the pacakge and use rostopic list to see the exposed topics
+
+### Known Issues:
+
+**Error while loading shared libraries: libnifalcon.so.1.0.2: cannot open shared object file: No such file or directory**
+
+Try running `sudo ldconfig`
 
