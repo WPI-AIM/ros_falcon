@@ -46,19 +46,19 @@ The Falcon is homed by running any utility program that accesses the Falcon, the
 
 If these steps work, then you should be able to use the ROS pacakge.
 
-## 5. Running the ROS package:
+### 4.2. Running the ROS package:
 
 ```
 rosrun ros_falcon driver
 ```
 This program should spawn the required ROS topics for state/command of the Falcon device.
 
-## 6. Known Issues:
+## 5. Known Issues:
 
-### 6.1 Moving the Falcon does not change the state data
+### 5.1 Moving the Falcon does not change the state data
 You may need to home the Falcon as described in 4.1
 
-### 6.2 Library not found
+### 5.2 Library not found
 
 For the following error, ``Error while loading shared libraries: libnifalcon.so.1.0.2: cannot open shared object file: No such file or directory``
 
