@@ -21,9 +21,9 @@ Then unplug and replug the device. You may also need to restart the OS.
 
 ## How to Run:
 
-Before running this ROS program. You may need to run the utility binaries from the `libnifalcon` package. 
+Before running this ROS program, you may need to run the utility binaries from the `libnifalcon` package. 
 If you installed the `libnifalcon` package properly (i.e. by running `sudo make install`), the binaries should be in 
-your system include path. 
+your system include path. Otherwise, they should be in `<libnifalcon/build/bin>` folder.
 
 Make sure that the power cord in plugged into the Falcon and the Falcon is connected to the PC. Run the following in your terminal
 
