@@ -30,7 +30,7 @@ Make sure that the power cord in plugged into the Falcon and the Falcon is conne
 ```bash
 findfalcons
 ```
-You should see the Falcon's LEDs change color and the terminal should indicated whether the Falcon is ready or not. If the program fails, running it a few times helps. You may need to run the program with `sudo` if the `udev` permissions were not set properly. However, you would need the `udev` set correctly for the ROS pacakge to work.
+You should see the Falcon's LEDs change color and the terminal should indicated whether the Falcon is ready or not. If the program fails, running it a few times helps. You may need to run the program with `sudo` if the `udev` permissions were not set properly. However, you would need the `udev` set correctly for the ROS package to work.
 
 **IMPORTANT: YOU MAY ALSO NEED TO HOME THE FALCON WHILE THE PROGRAM IS RUNNING. READ SECTION 4.1 ON HOW TO DO THAT**
 
@@ -44,7 +44,7 @@ barrow_mechanics
 The Falcon is homed by running any utility program that accesses the Falcon, then pulling the knob all the way outwards and then pushing it inwards until you sense a locking force. At this point, the falcon is homed.
 
 
-If these steps work, then you should be able to use the ROS pacakge.
+If these steps work, then you should be able to use the ROS package.
 
 ### 4.2. Running the ROS package:
 
